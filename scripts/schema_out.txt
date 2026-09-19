@@ -1,0 +1,48 @@
+=== DESCRIBE categories:
+  id | bigint(20) unsigned | NO
+  parent_id | bigint(20) unsigned | YES
+  name | varchar(255) | NO
+  slug | varchar(255) | NO
+  description | text | YES
+  image | varchar(255) | YES
+  icon | varchar(255) | YES
+  sort_order | int(11) | NO
+  is_featured | tinyint(1) | NO
+  status | enum('active','inactive') | NO
+  meta_title | varchar(255) | YES
+  meta_description | text | YES
+  created_at | timestamp | NO
+  updated_at | timestamp | NO
+
+=== DESCRIBE products cols:
+  id | bigint(20) unsigned
+  seller_id | bigint(20) unsigned
+  category_id | bigint(20) unsigned
+  name | varchar(255)
+  slug | varchar(255)
+  sku | varchar(100)
+  short_description | varchar(500)
+  description | longtext
+  features | longtext
+  specifications | longtext
+  dimensions | longtext
+  material | varchar(255)
+  color | varchar(255)
+  warranty_months | int(11)
+  min_order_quantity | int(10) unsigned
+  max_order_quantity | int(10) unsigned
+  unit | enum('piece','set','pair','box','carton','meter','square_meter')
+  price | decimal(15,2)
+  sale_price | decimal(15,2)
+  discount_price | decimal(15,2)
+  discount_percentage | decimal(5,2)
+  tax_percentage | decimal(5,2)
+  stock_quantity | int(10) unsigned
+  availability_status | enum('in_stock','out_of_stock','pre_order','made_to_order')
+  is_approved | tinyint(1)
+  approved_at | timestamp
+  approved_by | bigint(20) unsigned
+  is_featured | tinyint(1)
+  is_new_arrival | tinyint(1)
+  is_best_seller | tinyint(1)
+  rating | decimal(3,2)

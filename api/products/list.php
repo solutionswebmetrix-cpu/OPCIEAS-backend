@@ -5,8 +5,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     json_response(['success' => false, 'message' => 'Method not allowed'], 405);
 }
 
-$categoryId = $_GET['category_id'] ?? null;
-$categorySlug = isset($_GET['categorySlug']) ? trim((string)$_GET['categorySlug']) : (isset($_GET['category_slug']) ? trim((string)$_GET['category_slug']) : '');
+$categoryId = $_GET['category_id'] ?? ($_GET['categoryId'] ?? null);
+$categorySlug = isset($_GET['categorySlug'])
+    ? trim((string)$_GET['categorySlug'])
+    : (isset($_GET['category_slug'])
+        ? trim((string)$_GET['category_slug'])
+        : (isset($_GET['category'])
+            ? trim((string)$_GET['category'])
+            : ''));
 $status = isset($_GET['status']) ? trim((string)$_GET['status']) : null;
 $page = max(1, intval($_GET['page'] ?? 1));
 $limit = max(1, min(500, intval($_GET['limit'] ?? 12)));
@@ -19,12 +25,12 @@ if ($status !== null && $status !== '' && strtolower($status) !== 'all') {
     $where[] = "p.status = ?";
     $params[] = $status;
 }
-if ($categoryId) {
-    $where[] = "p.category_id = ?";
-    $params[] = $categoryId;
-} elseif ($categorySlug !== '') {
+if ($categorySlug !== '') {
     $where[] = "c.slug = ?";
     $params[] = $categorySlug;
+} elseif ($categoryId !== null && $categoryId !== '') {
+    $where[] = "p.category_id = ?";
+    $params[] = (int)$categoryId;
 }
 
 $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -39,12 +45,12 @@ try {
                    p.features, p.specifications, p.stock_quantity, p.status, p.is_featured as featured, p.meta_title, p.meta_description, p.created_at, p.updated_at,
                    c.name as category_name, c.slug as category_slug,
                    COALESCE(
-                       (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1),
+                       (SELECT NULLIF(image_url, '') FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1),
                        (SELECT image_path FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1),
                        ''
                    ) as image,
                    COALESCE(
-                       (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1),
+                       (SELECT NULLIF(image_url, '') FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1),
                        (SELECT image_path FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1),
                        ''
                    ) as thumbnail

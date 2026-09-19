@@ -121,6 +121,18 @@ $description = trim($input['description'] ?? $input['message'] ?? '');
 $expectedDelivery = trim($input['expected_delivery'] ?? $input['required_date'] ?? '');
 $phone = trim($input['phone'] ?? $input['contact_phone'] ?? '');
 $country = trim($input['country'] ?? '');
+$extraSpecifications = [];
+foreach (['project_type','sample_requirement','custom_dimensions','frame_colour','modification_requirements','product_sku','specification_notes'] as $key) {
+    if (isset($input[$key]) && trim((string)$input[$key]) !== '') {
+        $extraSpecifications[ucfirst(str_replace('_', ' ', $key))] = trim((string)$input[$key]);
+    }
+}
+if ($description !== '') {
+    $description = preg_replace('/\s+/', ' ', $description);
+}
+if (!empty($extraSpecifications)) {
+    $description .= ($description !== '' ? "\n\n" : '') . "Manufacturing details:\n" . implode("\n", array_map(fn($k, $v) => "$k: $v", array_keys($extraSpecifications), array_values($extraSpecifications)));
+}
 $city = trim($input['city'] ?? '');
 $state = trim($input['state'] ?? '');
 $budgetMin = isset($input['budget_range_min']) && $input['budget_range_min'] !== '' ? (float)$input['budget_range_min'] : null;
@@ -164,7 +176,7 @@ try {
         (int)$quantity,
         $unit,
         $description,
-        null,
+        !empty($extraSpecifications) ? json_encode($extraSpecifications, JSON_UNESCAPED_UNICODE) : null,
         $budgetMin,
         $budgetMax,
         $expectedDelivery !== '' ? $expectedDelivery : null,

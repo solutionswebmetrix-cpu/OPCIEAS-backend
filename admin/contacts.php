@@ -56,7 +56,7 @@ $totalPages = max(1, ceil($total / $limit));
             </select>
             <select name="type" class="form-select" style="max-width:180px;">
                 <option value="">All Types</option>
-                <?php foreach (['general','sales','support','partnership','career','tender'] as $t): ?>
+                <?php foreach (['general','sales','support','partnership','career','tender','catalogue_request'] as $t): ?>
                 <option value="<?php echo $t; ?>" <?php echo $type === $t ? 'selected' : ''; ?>><?php echo ucfirst($t); ?></option>
                 <?php endforeach; ?>
             </select>

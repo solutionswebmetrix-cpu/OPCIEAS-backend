@@ -1,7 +1,10 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
-$assetRoot = realpath(__DIR__ . '/../../frontend/src/assets/product');
+$assetRoot = realpath(__DIR__ . '/../../frontend/src/assets');
+if (!$assetRoot || !is_dir($assetRoot)) {
+    $assetRoot = realpath(__DIR__ . '/../../frontend/src/assets/product');
+}
 $uploadDir = rtrim(UPLOAD_DIR, '/\\') . DIRECTORY_SEPARATOR . 'products';
 $uploadUrlPrefix = UPLOAD_URL . 'products/';
 
@@ -578,7 +581,13 @@ $candidates = [];
 foreach ($it as $fileInfo) {
     $filename = $fileInfo->getFilename();
     if ($filename === '.' || $filename === '..' || !$fileInfo->isFile()) continue;
+
     $path = $fileInfo->getPathname();
+    $pathForCompare = str_replace('\\', '/', $path);
+    if (str_contains($pathForCompare, '/client/') || str_contains($pathForCompare, '/logo/') || str_contains($pathForCompare, '/trusted/')) {
+        continue;
+    }
+
     $ext = strtolower($fileInfo->getExtension());
     if (!in_array($ext, ['png', 'jpg', 'jpeg', 'webp', 'avif'], true)) continue;
     $rawName = $fileInfo->getBasename('.' . $ext);

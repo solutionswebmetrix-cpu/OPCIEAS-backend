@@ -17,6 +17,7 @@ foreach ($required as $r) {
 $name = trim((string)($input['name'] ?? ''));
 $slug = !empty($input['slug']) ? trim((string)$input['slug']) : strtolower(preg_replace('/[^a-z0-9]+/', '-', $name)) . '-' . substr(uniqid(), 0, 6);
 $category_id = (int)($input['category_id'] ?? 0);
+$subcategory = isset($input['subcategory']) ? trim((string)$input['subcategory']) : null;
 $price = isset($input['price']) ? (float)$input['price'] : ((isset($input['price_range']) && is_numeric($input['price_range'])) ? (float)$input['price_range'] : 0);
 $discount_price = isset($input['discount_price']) ? (float)$input['discount_price'] : null;
 $stock_quantity = isset($input['stock_quantity']) ? (int)$input['stock_quantity'] : 0;
@@ -24,6 +25,28 @@ $short_description = $input['short_description'] ?? ($input['short_desc'] ?? nul
 $description = $input['description'] ?? ($input['long_desc'] ?? null);
 $features = !empty($input['features']) ? $input['features'] : (!empty($input['features_json']) ? $input['features_json'] : []);
 $specifications = !empty($input['specs']) ? $input['specs'] : (!empty($input['specifications']) ? $input['specifications'] : (!empty($input['specs_json']) ? $input['specs_json'] : null));
+if (!empty($input['supply_type'])) {
+    $specifications['Supply Type'] = strtoupper((string)$input['supply_type']);
+}
+if (!is_array($specifications)) {
+    $specifications = is_string($specifications) ? json_decode($specifications, true) : [];
+}
+if (!is_array($specifications)) {
+    $specifications = [];
+}
+$dimensions = $input['dimensions'] ?? null;
+if (is_string($dimensions) && $dimensions !== '') {
+    $dimensions = json_decode($dimensions, true);
+}
+if (is_array($dimensions)) {
+    $specifications['Dimensions'] = is_array($dimensions) ? json_encode($dimensions, JSON_UNESCAPED_UNICODE) : (string)$dimensions;
+}
+if (!empty($input['materials_used'])) { $specifications['Materials Used'] = (string)$input['materials_used']; }
+if (!empty($input['packaging_specifications'])) { $specifications['Packaging Specifications'] = (string)$input['packaging_specifications']; }
+if (!empty($input['warranty_terms'])) { $specifications['Warranty'] = (string)$input['warranty_terms']; }
+if (!empty($input['weight'])) { $specifications['Weight'] = (string)$input['weight']; }
+if (!empty($input['variants'])) { $specifications['Variants'] = is_array($input['variants']) ? json_encode($input['variants'], JSON_UNESCAPED_UNICODE) : (string)$input['variants']; }
+if (isset($input['export_available'])) { $specifications['Export Available'] = ((int)$input['export_available'] ? 'Yes' : 'No'); }
 $is_featured = isset($input['featured']) ? (int)$input['featured'] : (isset($input['is_featured']) ? (int)$input['is_featured'] : 0);
 $status = $input['status'] ?? 'Pending';
 if ($status === 'Draft') {
@@ -53,7 +76,7 @@ if (!in_array($status, $validStatuses, true)) {
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare("INSERT INTO products (seller_id, category_id, name, slug, sku, short_description, description, features, specifications, price, discount_price, stock_quantity, is_featured, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    $stmt = $pdo->prepare("INSERT INTO products (seller_id, category_id, name, slug, sku, short_description, description, features, specifications, dimensions, material, price, discount_price, stock_quantity, is_featured, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
     $stmt->execute([
         $seller_id,
         $category_id,
@@ -64,6 +87,8 @@ try {
         $description,
         is_array($features) ? json_encode($features) : null,
         is_array($specifications) ? json_encode($specifications) : ($specifications ? (string)$specifications : null),
+        is_array($dimensions) ? json_encode($dimensions, JSON_UNESCAPED_UNICODE) : ($dimensions ? (string)$dimensions : null),
+        !empty($input['materials_used']) ? (string)$input['materials_used'] : null,
         $price,
         $discount_price,
         $stock_quantity,
@@ -93,8 +118,8 @@ try {
     foreach ($filesToProcess as $i => $file) {
         $result = upload_file($file, 'products');
         if ($result['success']) {
-            $imgStmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, created_at) VALUES (?, ?, ?, ?, NOW())");
-            $imgStmt->execute([$product_id, $result['path'] ?? $result['url'], $result['url'] ?? '', $i]);
+            $imgStmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, is_primary, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+            $imgStmt->execute([$product_id, $result['path'] ?? $result['url'], $result['url'] ?? '', $i, $i === 0 ? 1 : 0]);
             $image_urls[] = $result['url'];
         }
     }

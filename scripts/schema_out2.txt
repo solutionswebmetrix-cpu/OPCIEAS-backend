@@ -1,0 +1,29 @@
+=== DESCRIBE products (remaining cols after 30):
+  rating | decimal(3,2)
+  total_reviews | int(10) unsigned
+  total_views | int(10) unsigned
+  total_orders | int(10) unsigned
+  status | enum('Pending','Published','Hidden','Rejected')
+  meta_title | varchar(255)
+  meta_description | text
+  created_at | timestamp
+  updated_at | timestamp
+
+=== DESCRIBE product_images:
+  id | bigint(20) unsigned
+  product_id | bigint(20) unsigned
+  image_path | varchar(500)
+  image_url | varchar(500)
+  alt_text | varchar(255)
+  sort_order | int(11)
+  is_primary | tinyint(1)
+  created_at | timestamp
+  updated_at | timestamp
+
+=== DESCRIBE product_specs:
+  id | bigint(20) unsigned
+  product_id | bigint(20) unsigned
+  spec_key | varchar(100)
+  spec_value | text
+  created_at | timestamp
+  updated_at | timestamp

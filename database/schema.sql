@@ -1,6 +1,6 @@
 -- MySQL Schema for OPCIEAS Furniture Platform
 -- Engine: InnoDB | Charset: utf8mb4
--- Aligned per STEP 8 / STEP 14 Status Enums
+-- Aligned per STEP 8 / STEP 14 Status Enums 
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -167,6 +167,74 @@ CREATE TABLE `buyer_profiles` (
   KEY `buyer_profiles_city_index` (`city`),
   KEY `buyer_profiles_status_index` (`status`),
   CONSTRAINT `buyer_profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for supplier applications
+CREATE TABLE `supplier_applications` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED DEFAULT NULL,
+  `full_name` VARCHAR(255) NOT NULL,
+  `company_name` VARCHAR(255) NOT NULL,
+  `business_registration_number` VARCHAR(100) NOT NULL,
+  `tax_identification_number` VARCHAR(100) NOT NULL,
+  `address` TEXT NOT NULL,
+  `phone_number` VARCHAR(20) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `whatsapp_number` VARCHAR(20) DEFAULT NULL,
+  `bank_name` VARCHAR(255) DEFAULT NULL,
+  `account_number` VARCHAR(50) DEFAULT NULL,
+  `ifsc_code` VARCHAR(20) DEFAULT NULL,
+  `declaration_text` TEXT NOT NULL,
+  `signature` VARCHAR(255) DEFAULT NULL,
+  `name_designation` VARCHAR(255) DEFAULT NULL,
+  `application_date` DATE DEFAULT NULL,
+  `status` ENUM('Pending','Approved','Rejected','Under Review') NOT NULL DEFAULT 'Pending',
+  `review_notes` TEXT DEFAULT NULL,
+  `reviewed_by` BIGINT UNSIGNED DEFAULT NULL,
+  `reviewed_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `supplier_applications_user_id_foreign` (`user_id`),
+  KEY `supplier_applications_status_index` (`status`),
+  KEY `supplier_applications_email_index` (`email`),
+  CONSTRAINT `supplier_applications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `supplier_applications_reviewed_by_foreign` FOREIGN KEY (`reviewed_by`) REFERENCES `admin_users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for buyer applications
+CREATE TABLE `buyer_applications` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED DEFAULT NULL,
+  `full_name` VARCHAR(255) NOT NULL,
+  `company_name` VARCHAR(255) DEFAULT NULL,
+  `business_registration_number` VARCHAR(100) DEFAULT NULL,
+  `address` TEXT NOT NULL,
+  `phone_number` VARCHAR(20) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `whatsapp_number` VARCHAR(20) DEFAULT NULL,
+  `business_purpose` TEXT NOT NULL,
+  `preferred_categories` JSON DEFAULT NULL,
+  `declaration_text` TEXT NOT NULL,
+  `signature` VARCHAR(255) DEFAULT NULL,
+  `name_designation` VARCHAR(255) DEFAULT NULL,
+  `application_date` DATE DEFAULT NULL,
+  `status` ENUM('Pending','Approved','Rejected','Under Review') NOT NULL DEFAULT 'Pending',
+  `review_notes` TEXT DEFAULT NULL,
+  `reviewed_by` BIGINT UNSIGNED DEFAULT NULL,
+  `reviewed_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `buyer_applications_user_id_foreign` (`user_id`),
+  KEY `buyer_applications_status_index` (`status`),
+  KEY `buyer_applications_email_index` (`email`),
+  CONSTRAINT `buyer_applications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `buyer_applications_reviewed_by_foreign` FOREIGN KEY (`reviewed_by`) REFERENCES `admin_users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -696,14 +764,14 @@ CREATE TABLE `newsletters` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- DEFAULT DATA INSERTS
+-- DEFAULT DATA INSERTS 
 -- --------------------------------------------------------
 
 -- Insert Default Admin User (password: password)
 INSERT INTO `admin_users` (`username`, `email`, `password_hash`, `full_name`, `role`, `status`) VALUES
 ('admin', 'admin@opcieas.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System Administrator', 'super_admin', 'active');
 
--- Insert Default Categories (match CANONICAL_CATEGORIES in src/lib/images.ts)
+-- Insert Default Categories (match CANONICAL_CATEGORIES in src/lib/images.ts) 
 INSERT INTO `categories` (`name`, `slug`, `description`, `sort_order`, `is_featured`, `status`) VALUES
 ('Office Furniture', 'office-furniture', 'Premium office furniture including workstations, desks, chairs, meeting tables, storage cabinets, and modular office solutions.', 1, 1, 'active'),
 ('Educational Furniture', 'educational-furniture', 'Complete range of educational furniture for schools, colleges, universities, coaching centers, and training institutes.', 2, 1, 'active'),

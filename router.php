@@ -7,6 +7,11 @@ if ($uri === '/' || $uri === '/index.php') {
     return;
 }
 
+if (preg_match('#^/api/(sellers|buyers)/?$#', $uri, $m)) {
+    require __DIR__ . '/api/' . $m[1] . '/index.php';
+    return;
+}
+
 if (preg_match('#^/api/products/?$#', $uri)) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require __DIR__ . '/api/products/create.php';
@@ -19,6 +24,27 @@ if (preg_match('#^/api/products/?$#', $uri)) {
 if (preg_match('#^/api/products/upload/?$#', $uri)) {
     require __DIR__ . '/api/products/upload.php';
     return;
+}
+
+if (preg_match('#^/api/([^/]+)/([^/]+)/([^/]+)\.php/?$#', $uri, $m)) {
+    $resource = $m[1];
+    $action = $m[2];
+    $subaction = $m[3];
+    $file = __DIR__ . '/api/' . $resource . '/' . $action . '/' . $subaction . '.php';
+    if (is_file($file)) {
+        require $file;
+        return;
+    }
+}
+
+if (preg_match('#^/api/([^/]+)/([^/]+)/?$#', $uri, $m)) {
+    $resource = $m[1];
+    $action = $m[2];
+    $file = __DIR__ . '/api/' . $resource . '/' . $action . '.php';
+    if (is_file($file)) {
+        require $file;
+        return;
+    }
 }
 
 if (preg_match('#^/api/products/(list|get|create|update|delete|upload)\.php/?$#', $uri)) {
@@ -39,6 +65,16 @@ if (preg_match('#^/api/products/([^/]+)/?$#', $uri, $m)) {
         require __DIR__ . '/api/products/get.php';
     }
     return;
+}
+
+if (preg_match('#^/api/([^/]+)/([^/]+)/?$#', $uri, $m)) {
+    $resource = $m[1];
+    $action = $m[2];
+    $file = __DIR__ . '/api/' . $resource . '/' . $action . '.php';
+    if (is_file($file)) {
+        require $file;
+        return;
+    }
 }
 
 if (is_file(__DIR__ . $uri)) {

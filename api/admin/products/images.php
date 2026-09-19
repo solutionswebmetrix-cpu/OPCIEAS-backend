@@ -56,8 +56,9 @@ try {
             $stmt = $pdo->prepare("SELECT MAX(sort_order) AS max_sort FROM product_images WHERE product_id = ?");
             $stmt->execute([$product_id]);
             $maxSort = (int)$stmt->fetchColumn() + 1;
-            $stmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, created_at) VALUES (?, ?, ?, ?, NOW())");
-            $stmt->execute([$product_id, $upload['path'] ?? $upload['url'], $upload['url'] ?? '', $maxSort]);
+            $hasPrimary = (int)$pdo->query("SELECT COUNT(*) FROM product_images WHERE product_id = " . $product_id . " AND is_primary = 1")->fetchColumn() > 0;
+            $stmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, is_primary, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+            $stmt->execute([$product_id, $upload['path'] ?? $upload['url'], $upload['url'] ?? '', $maxSort, $hasPrimary ? 0 : 1]);
             $added[] = ['id' => (int)$pdo->lastInsertId(), 'url' => $upload['url'], 'path' => $upload['path'] ?? $upload['url']];
             log_activity($admin_id, 'product_image_added', 'product', $product_id, ['url' => $upload['url']]);
         } elseif (isset($_FILES['image_uploads']) && is_array($_FILES['image_uploads']['tmp_name'])) {
@@ -76,8 +77,9 @@ try {
                 $stmt = $pdo->prepare("SELECT MAX(sort_order) AS max_sort FROM product_images WHERE product_id = ?");
                 $stmt->execute([$product_id]);
                 $maxSort = (int)$stmt->fetchColumn() + 1;
-                $stmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, created_at) VALUES (?, ?, ?, ?, NOW())");
-                $stmt->execute([$product_id, $upload['path'] ?? $upload['url'], $upload['url'] ?? '', $maxSort]);
+                $hasPrimary = (int)$pdo->query("SELECT COUNT(*) FROM product_images WHERE product_id = " . $product_id . " AND is_primary = 1")->fetchColumn() > 0;
+                $stmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, is_primary, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+                $stmt->execute([$product_id, $upload['path'] ?? $upload['url'], $upload['url'] ?? '', $maxSort, $hasPrimary ? 0 : 1]);
                 $added[] = ['id' => (int)$pdo->lastInsertId(), 'url' => $upload['url'], 'path' => $upload['path'] ?? $upload['url']];
                 log_activity($admin_id, 'product_image_added', 'product', $product_id, ['url' => $upload['url']]);
             }
@@ -86,8 +88,9 @@ try {
             $stmt = $pdo->prepare("SELECT MAX(sort_order) AS max_sort FROM product_images WHERE product_id = ?");
             $stmt->execute([$product_id]);
             $maxSort = (int)$stmt->fetchColumn() + 1;
-            $stmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, created_at) VALUES (?, ?, ?, ?, NOW())");
-            $stmt->execute([$product_id, $url, $url, $maxSort]);
+            $hasPrimary = (int)$pdo->query("SELECT COUNT(*) FROM product_images WHERE product_id = " . $product_id . " AND is_primary = 1")->fetchColumn() > 0;
+            $stmt = $pdo->prepare("INSERT INTO product_images (product_id, image_path, image_url, sort_order, is_primary, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+            $stmt->execute([$product_id, $url, $url, $maxSort, $hasPrimary ? 0 : 1]);
             $added[] = ['id' => (int)$pdo->lastInsertId(), 'url' => $url];
             log_activity($admin_id, 'product_image_added', 'product', $product_id, ['url' => $url]);
         }

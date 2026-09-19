@@ -1,0 +1,1 @@
+{"success":true,"message":"Product permanently deleted","data":{"id":564,"name":"TEST PRODUCT — REMOVE AFTER VERIFICATION","slug":"test-product-remove-after-verification","image_count":1,"files_deleted":1}}

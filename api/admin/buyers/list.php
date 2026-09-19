@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../../config/config.php';
+require_once __DIR__ . '/../../../config/config.php';
 $admin_id = require_role('admin');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -36,9 +36,15 @@ try {
     $countStmt->execute($params);
     $total = (int)$countStmt->fetchColumn();
 
-    $sql = "SELECT bp.*, u.name AS user_name, u.email AS user_email, u.phone AS user_phone
+    $sql = "SELECT bp.*, u.name AS user_name, u.email AS user_email, u.phone AS user_phone,
+        ba.full_name AS application_full_name, ba.company_name AS application_company_name, ba.business_registration_number AS application_registration_number,
+        ba.address AS application_address, ba.phone_number AS application_phone_number, ba.email AS application_email, ba.whatsapp_number AS application_whatsapp_number,
+        ba.business_purpose AS application_business_purpose, ba.preferred_categories AS application_preferred_categories, ba.declaration_text AS application_declaration,
+        ba.signature AS application_signature, ba.name_designation AS application_name_designation, ba.application_date AS application_date,
+        ba.status AS application_status, ba.review_notes AS application_review_notes
         FROM buyer_profiles bp
         LEFT JOIN users u ON bp.user_id = u.id
+        LEFT JOIN buyer_applications ba ON ba.user_id = bp.user_id
         $whereSql
         ORDER BY bp.created_at DESC
         LIMIT ? OFFSET ?";

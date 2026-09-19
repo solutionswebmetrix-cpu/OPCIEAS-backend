@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../../config/config.php';
+require_once __DIR__ . '/../../../config/config.php';
 $admin_id = require_role('admin');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -13,6 +13,16 @@ if (!$id) {
 }
 
 try {
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE category_id = ?");
+    $countStmt->execute([$id]);
+    $productCount = (int)$countStmt->fetchColumn();
+    if ($productCount > 0) {
+        json_response([
+            'success' => false,
+            'message' => "Cannot delete this category because it contains {$productCount} products. Reassign the products first."
+        ], 409);
+    }
+
     $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ?");
     $stmt->execute([$id]);
 

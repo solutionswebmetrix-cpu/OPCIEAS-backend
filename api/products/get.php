@@ -26,7 +26,7 @@ try {
         json_response(['success' => false, 'message' => 'Product not found'], 404);
     }
 
-    $gStmt = $pdo->prepare("SELECT id, COALESCE(image_url, image_path) AS image_url, image_path, alt_text, sort_order, is_primary FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, id ASC");
+    $gStmt = $pdo->prepare("SELECT id, COALESCE(NULLIF(image_url, ''), image_path) AS image_url, image_path, alt_text, sort_order, is_primary FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, id ASC");
     $gStmt->execute([$product['id']]);
     $images = $gStmt->fetchAll();
     $product['images'] = $images;
@@ -43,11 +43,26 @@ try {
     }
     $product['specs'] = $specs;
 
-    if (!empty($product['specs_json'])) {
-        $decoded = json_decode($product['specs_json'], true);
+    if (!empty($product['specifications'])) {
+        $decoded = json_decode($product['specifications'], true);
         if (is_array($decoded)) {
             $product['specs'] = array_merge($decoded, $product['specs']);
         }
+    }
+    if (!empty($product['dimensions'])) {
+        $decoded = json_decode($product['dimensions'], true);
+        if (is_array($decoded)) {
+            $product['specs']['Dimensions'] = json_encode($decoded, JSON_UNESCAPED_UNICODE);
+        }
+    }
+    if (!empty($product['material'])) {
+        $product['specs']['Materials Used'] = $product['material'];
+    }
+    if (!empty($product['warranty_months'])) {
+        $product['specs']['Warranty'] = $product['warranty_months'] . ' Months Warranty';
+    }
+    if (!empty($product['specs']['Export Available'])) {
+        $product['export_available'] = strtolower((string)$product['specs']['Export Available']) === 'yes';
     }
 
     json_response([

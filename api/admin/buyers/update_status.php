@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../../config/config.php';
+require_once __DIR__ . '/../../../config/config.php';
 $admin_id = require_role('admin');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -34,6 +34,14 @@ try {
 
     $stmt = $pdo->prepare("UPDATE buyer_profiles SET status = ?, updated_at = NOW() WHERE id = ?");
     $stmt->execute([$status, $id]);
+
+    $stmt = $pdo->prepare("SELECT id FROM buyer_applications WHERE user_id = ? LIMIT 1");
+    $stmt->execute([$buyer['user_id']]);
+    $application = $stmt->fetch();
+    if ($application) {
+        $appStmt = $pdo->prepare("UPDATE buyer_applications SET status = ?, review_notes = ?, reviewed_by = ?, reviewed_at = NOW(), updated_at = NOW() WHERE id = ?");
+        $appStmt->execute([$status, $input['review_notes'] ?? null, $admin_id, $application['id']]);
+    }
 
     log_activity($admin_id, 'buyer_status_changed', 'buyer', $id, [
         'old_status' => $oldStatus,

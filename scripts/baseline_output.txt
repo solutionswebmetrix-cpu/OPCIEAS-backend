@@ -1,0 +1,52 @@
+=== BASELINE DB COUNT SNAPSHOT (BEFORE MIGRATION) ===
+
+CATEGORIES TOTAL: 8
+
+CATEGORIES LIST:
+ID  | slug                       | name                        | status   | featured | created_at
+------------------------------------------------------------------------------------------------------------------------
+  1 | office-furniture           | Office Furniture            | active   | YES      | 2026-08-03
+  2 | educational-furniture      | Educational Furniture       | active   | YES      | 2026-08-03
+  3 | school-furniture           | School Furniture            | active   | YES      | 2026-08-03
+  4 | hospital-furniture         | Hospital Furniture          | active   | YES      | 2026-08-03
+  5 | hostel-furniture           | Hostel Furniture            | active   | no       | 2026-08-03
+  6 | industrial-storage         | Industrial Storage          | active   | no       | 2026-08-03
+  7 | bathroom-collection        | Bathroom Collection         | active   | no       | 2026-08-03
+  8 | letter-boxes               | Letter Box                  | active   | no       | 2026-08-03
+
+PER-CATEGORY PRODUCT COUNTS (ALL statuses):
+  1. Office Furniture           : 0 products
+  2. Educational Furniture      : 0 products
+  3. School Furniture           : 0 products
+  4. Hospital Furniture         : 0 products
+  5. Hostel Furniture           : 0 products
+  6. Industrial Storage         : 0 products
+  7. Bathroom Collection        : 0 products
+  8. Letter Box                 : 0 products
+
+PER-CATEGORY PUBLISHED ONLY:
+  1. Office Furniture           : 0 Published
+  2. Educational Furniture      : 0 Published
+  3. School Furniture           : 0 Published
+  4. Hospital Furniture         : 0 Published
+  5. Hostel Furniture           : 0 Published
+  6. Industrial Storage         : 0 Published
+  7. Bathroom Collection        : 0 Published
+  8. Letter Box                 : 0 Published
+
+PRODUCTS BY STATUS:
+  TOTAL ALL STATUS: 0
+
+ORPHAN PRODUCTS (invalid category_id): 0
+
+IMAGES:
+  PRODUCT_IMAGES ROWS: 0
+  PRODUCTS WITH >= 1 GALLERY IMAGE: 0
+  PRODUCTS WITH PRIMARY (via is_primary=1): 0
+
+PRODUCT_SPEC ROWS (key/value): 0
+PRODUCTS WITH >= 1 SPEC: 0
+
+Approval / moderation flags:
+
+Done.

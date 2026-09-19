@@ -1,13 +1,25 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+
+$requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+$requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = array_filter(array_map('trim', preg_split('/[,;\s]+/', (string)(getenv('ALLOWED_ORIGINS') ?: 'http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:3000'))));
+
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: ' . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
+if ($requestOrigin !== '' && in_array($requestOrigin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $requestOrigin);
+} elseif ($requestMethod === 'OPTIONS' || ($requestOrigin === '' && !in_array('credentials', $_SERVER, true))) {
+    header('Access-Control-Allow-Origin: http://localhost:5173');
+} else {
+    header('Access-Control-Allow-Origin: http://localhost:5173');
+}
 header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token, X-Requested-With');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
-
-$requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
 
 if ($requestMethod === 'OPTIONS') {
     http_response_code(204);
@@ -32,6 +44,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
 define('DB_NAME', getenv('DB_NAME') ?: 'opcieas');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: '');
@@ -76,7 +89,7 @@ define('STATUS_DRAFT', 'Draft');
 
 try {
     $pdo = new PDO(
-        'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET,
+        'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET,
         DB_USER,
         DB_PASS,
         [
@@ -88,10 +101,11 @@ try {
     );
 } catch (PDOException $e) {
     http_response_code(500);
+    $debugMessage = in_array(strtolower((string)(getenv('APP_ENV') ?: 'development')), ['development', 'local', 'dev'], true) ? $e->getMessage() : null;
     echo json_encode([
         'success' => false,
         'error'   => 'Database connection failed. Please check DB configuration.',
-        'debug'   => (getenv('APP_ENV') === 'development') ? $e->getMessage() : null,
+        'message' => $debugMessage,
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -107,6 +121,23 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['LAST_ACTIVITY'])) {
     }
 }
 $_SESSION['LAST_ACTIVITY'] = time();
+
+// Restore the admin session when the SPA sends the remember token instead of PHPSESSID.
+$authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+if (!empty($authorization) && preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches)) {
+    $rememberToken = trim($matches[1]);
+    if ($rememberToken !== '') {
+        $rememberStmt = $pdo->prepare("SELECT id, username, role FROM admin_users WHERE remember_token = ? AND remember_expires > NOW() AND status = 'active' LIMIT 1");
+        $rememberStmt->execute([$rememberToken]);
+        $rememberedAdmin = $rememberStmt->fetch();
+        if ($rememberedAdmin) {
+            $_SESSION['user_id'] = $rememberedAdmin['id'];
+            $_SESSION['role'] = $rememberedAdmin['role'];
+            $_SESSION['username'] = $rememberedAdmin['username'];
+            $_SESSION['authenticated'] = true;
+        }
+    }
+}
 
 if (!function_exists('json_response')) {
     function json_response($data, $code = 200)

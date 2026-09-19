@@ -1,0 +1,1 @@
+{"success":true,"message":"Login successful","user":{"id":1,"username":"admin","role":"super_admin","name":"System Administrator","email":"admin@opcieas.com"},"token":null,"remember_token":null,"csrf_token":"bf2007b1d2c7808603881c99311dcc276ad5566bc98a6adb49e8118784f0b15b","redirect":"/dashboard"}

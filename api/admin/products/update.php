@@ -30,7 +30,8 @@ try {
     $allowed = [
         'name', 'slug', 'category_id', 'sku', 'short_description', 'description',
         'price', 'discount_price', 'stock_quantity', 'is_featured', 'status', 'seller_id',
-        'features', 'specifications', 'meta_title', 'meta_description'
+        'features', 'specifications', 'dimensions', 'material', 'meta_title', 'meta_description',
+        'color', 'warranty_months', 'min_order_quantity', 'max_order_quantity', 'unit'
     ];
     foreach ($allowed as $f) {
         if (!array_key_exists($f, $input)) continue;
@@ -63,8 +64,11 @@ try {
         if ($f === 'features') {
             $val = is_array($val) ? json_encode($val, JSON_UNESCAPED_UNICODE) : null;
         }
-        if ($f === 'specifications') {
+        if ($f === 'specifications' || $f === 'dimensions' || $f === 'variants' || $f === 'tags') {
             $val = is_array($val) ? json_encode($val, JSON_UNESCAPED_UNICODE) : ($val ? (string)$val : null);
+        }
+        if ($f === 'export_available') {
+            $val = !empty($val) ? 1 : 0;
         }
         $fields[] = "$f = ?";
         $params[] = $val;

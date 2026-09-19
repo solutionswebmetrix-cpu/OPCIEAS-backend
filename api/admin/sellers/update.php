@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../../config/config.php';
+require_once __DIR__ . '/../../../config/config.php';
 $admin_id = require_role('admin');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -32,6 +32,18 @@ try {
 
     $oldStatus = $seller['status'];
     $newStatus = $status ?: $oldStatus;
+
+    $tableStmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'supplier_applications'");
+    $tableStmt->execute();
+    if ((int)$tableStmt->fetchColumn() > 0) {
+        $stmt = $pdo->prepare("SELECT id FROM supplier_applications WHERE user_id = ? LIMIT 1");
+        $stmt->execute([$seller['user_id']]);
+        $application = $stmt->fetch();
+        if ($application) {
+            $appStmt = $pdo->prepare("UPDATE supplier_applications SET status = ?, review_notes = ?, reviewed_by = ?, reviewed_at = NOW(), updated_at = NOW() WHERE id = ?");
+            $appStmt->execute([$newStatus, $input['verification_remarks'] ?? null, $admin_id, $application['id']]);
+        }
+    }
 
     $fields = [];
     $params = [];
