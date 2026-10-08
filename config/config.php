@@ -5,7 +5,7 @@ ini_set('display_startup_errors', '1');
 
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
 $requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowedOrigins = array_filter(array_map('trim', preg_split('/[,;\s]+/', (string)(getenv('ALLOWED_ORIGINS') ?: 'http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:3000'))));
+$allowedOrigins = array_filter(array_map('trim', preg_split('/[,;\s]+/', (string)(getenv('ALLOWED_ORIGINS') ?: 'http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:3000,https://opcieas-frontend.vercel.app,https://www.opcieas-frontend.vercel.app,https://opcieas.com,https://www.opcieas.com'))));
 
 header('Content-Type: application/json');
 if ($requestOrigin !== '' && in_array($requestOrigin, $allowedOrigins, true)) {
